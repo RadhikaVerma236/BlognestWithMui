@@ -1,64 +1,74 @@
 // src/pages/WelcomePage.tsx
-import { Box, Button, Container, Typography } from "@mui/material"
+import { Box, Button, Typography } from "@mui/material"
 import { Link } from "react-router-dom"
 
 const WelcomePage=()=>{
+    
     return(
-        <Box sx={{
-            bgcolor:'background.default',
-            color:'text.primary',
-            display:'flex',
-            flexDirection:'column',
-            overflow: "hidden", // Prevent accidental scroll
-            pt: { xs: 8, sm: 10 }, // Top padding to clear the AppBar
-        }}>
-            
-            {/* Main Content */}
-            <Container
-            maxWidth={false}
+         <Box
+      sx={{
+        minHeight: "100vh", // Full screen height
+        bgcolor: "background.default",
+        color: "text.primary",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        px: 2,
+        textAlign: "center",
+      }}
+    >
+      {/* HEADLINE */}
+      <Typography
+        variant="h2"
+        fontWeight="bold"
+        gutterBottom
         sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center',
-        //    mt: { xs: 4, sm: 6 }, // this helps if content is too short
-          py: 8,
-        }}>
-                <Typography variant="h2" fontWeight="bold" mb={2}>
-                    Welcome to Blognest
-                </Typography>
-                <Typography variant="h6" color="text.secondary" mb={4}>
-                    A place to share your thoughts, ideas, and stories with the world. Simple. Fast. Beautiful.
-                </Typography>
+          fontSize: {
+            xs: "2.25rem", // mobile
+            sm: "3rem",
+            md: "3.75rem",
+          },
+        }}
+      >
+        Welcome to Blognest
+      </Typography>
 
-                <Box display="flex" justifyContent="center" gap={2}>
-                    <Button
-                    component={Link}
-            to="/signup"
-            variant="contained"
-            color="primary"
-            size="large">
-                        Get Started
-                    </Button>
-                    <Button
-                    component={Link}
-            to="/login"
-            variant="outlined"
-            color="primary"
-            size="large">
-                Login
-                </Button>
-                </Box>
-            </Container>
-             {/* Footer */}
-             {/* <Box component="footer" textAlign="center" py={2} bgcolor="surface.main">
-                <Typography variant="body2" color="text.secondary">
-                    © {new Date().getFullYear()} BlogSphere. All rights reserved.
-                </Typography>
-             </Box> */}
-        </Box>
+      {/* SUBTEXT */}
+      <Typography
+        variant="h6"
+        color="text.secondary"
+        mb={4}
+        sx={{
+          maxWidth: 600,
+        }}
+      >
+        Share your thoughts, ideas, and stories with the world — beautifully and effortlessly.
+      </Typography>
+
+      {/* ACTION BUTTONS */}
+      <Box display="flex" gap={2} flexWrap="wrap" justifyContent="center">
+        <Button
+          component={Link}
+          to="/signup"
+          variant="contained"
+          color="primary"
+          size="large"
+        >
+          Get Started
+        </Button>
+
+        <Button
+          component={Link}
+          to="/Login"
+          variant="outlined"
+          color="primary"
+          size="large"
+        >
+          Login
+        </Button>
+      </Box>
+    </Box>
     );
 };
 

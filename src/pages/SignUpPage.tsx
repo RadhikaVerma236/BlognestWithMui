@@ -1,142 +1,147 @@
-import { useNavigate, Link } from "react-router-dom";
+// pages/Signup.tsx
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Alert,
+  IconButton,
+  InputAdornment,
+  } from "@mui/material";
 import { useState } from "react";
-import { Button, TextField, Typography, Box, Container, Paper, InputAdornment, IconButton } from "@mui/material";
+import { useNavigate, Link } from "react-router-dom";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-const SignUpPage =()=>{
-    const navigate = useNavigate();
+const SignUpPage = () => {
+  const navigate = useNavigate();
 
-    //form state values
-    const [fullName, setFullName]= useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+  // Form state
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-    // Show or hide password toggle
-    const [showPassword, setShowPassword]= useState(false);
-    const [showConfirmPassword, setShowConfirmPassword]= useState(false);
+  // Show/hide state
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-    //Error State
-    const [error, setError] = useState('');
+  // Error/Success state
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-    //hanndle form Submission
-    const handleSubmit  = (e:React.FormEvent) =>{
-        e.preventDefault();
+  // Regex: Min 8 characters, at least 1 letter and 1 number
+  const passwordIsStrong = (pass: string) =>
+    /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/.test(pass);
 
-        //Reset error first
-        setError('');
 
-        //Check if all fields are filled
-        if(!fullName || !email || !password || !confirmPassword){
-            setError('All fields are required');
-    return;
-        }
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault();
 
-        //VALIDATE PASSWORD MATCH
-        if(password !== confirmPassword){
-            setError('Password do not match');
-            return;
-        }
+    if (!fullName || !email || !password || !confirmPassword) {
+      setError("All fields are required.");
+      return;
+    }
 
-        //create a user object
-        const user = {fullName, email, password};
+    if (!passwordIsStrong(password)) {
+      setError("Password must be at least 8 characters and include a letter and a number.");
+      return;
+    }
 
-        //save user to localstorage (signup)
-        localStorage.setItem('user', JSON.stringify(user));
-        localStorage.setItem('theme','light');  //optional
+    // Check for existing users
+    const storedUsers = localStorage.getItem("users");
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
 
-        //Redirect to homepage 
-        navigate('/');
-    };
+    const emailExists = users.some((user: any) => user.email === email);
+    if (emailExists) {
+      setError("Email already exists. Try logging in.");
+      return;
+    }
 
-    return(
-        <Container maxWidth="sm" sx={{ py: 8 }}>
-            <Paper elevation={3} sx={{ p: 4 }}>
+    // Save user
+    const newUser = { fullName, email, password };
+    users.push(newUser);
+    localStorage.setItem("users", JSON.stringify(users));
 
-                {/*Title*/}
-                <Typography variant="h4" fontWeight="bold" textAlign="center" gutterBottom>
-                    Sign Up
-                </Typography>
+    setSuccess("Signup successful! Redirecting to login...");
+    setError("");
 
-                {/*Subtitle */}
-                <Typography variant="body1" textAlign="center" mb={4}>
-                    Create your Blognest account
-                </Typography>
+    // Redirect after delay
+    setTimeout(() => navigate("/login"), 500);
+  };
 
-                {/* Signup Form */}
-                <Box component="form" onSubmit={handleSubmit} noValidate>
-                   {/* Full Name */}
-                   <TextField 
-                   label="Full Name"
-                   fullWidth
-                   margin="normal"
-                   required
-                   value={fullName}
-                   onChange={(e)=>setFullName(e.target.value)}
-                />
+  return (
+    <Container maxWidth="sm"
+    sx={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "100vh",
+  }}>
+      <Box p={4} bgcolor="surface.light" borderRadius={2} boxShadow={2} width="100%">
+        <Typography variant="h4" mb={2}>
+          Sign Up
+        </Typography>
 
-                {/* Email */}
+        <form onSubmit={handleSignup}>
+          <TextField
+            label="Full Name"
+            fullWidth
+            margin="normal"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
           <TextField
             label="Email"
             type="email"
             fullWidth
             margin="normal"
-            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-
-                   {/* Password*/}
-                   <TextField 
-                   label="Password"
-                   type={showPassword ? 'text' : 'password'}
-                   fullWidth
-                   margin="normal"
-                   required
-                   value={password}
-                   onChange={(e)=>setPassword(e.target.value)}
-                   InputProps={{
-                    endAdornment:(
-                        <InputAdornment position="end">
-                            <IconButton 
-                            onClick={()=> setShowPassword(!showPassword)}
-                            edge="end"
-                            aria-label="toggle password visibility"
-                            >
-                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                        </InputAdornment>
-                    ),
-                   }} 
-                   />
-
-                   {/* Confirm Password */}
           <TextField
-            label="Confirm Password"
-            type={showConfirmPassword ? 'text' : 'password'}
+            label="Password"
+            type="password"
             fullWidth
             margin="normal"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            error={Boolean(error)}
-            helperText={error}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={() => setShowPassword((prev) => !prev)}
                     edge="end"
-                    aria-label="toggle confirm password visibility"
                   >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
             }}
           />
+          <TextField
+            label="Confirm Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowConfirm((prev) => !prev)}
+                    edge="end"
+                  >
+                    {showConfirm ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+          {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
 
-          {/* Submit Button */}
           <Button
             type="submit"
             variant="contained"
@@ -146,19 +151,23 @@ const SignUpPage =()=>{
           >
             Sign Up
           </Button>
-
-          {/* Already have an account link */}
-          <Button
-            onClick={() => navigate('/login')}
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Already have an account? Login
-          </Button>
-                </Box>
-            </Paper>
-        </Container>
-    );
+        </form>
+        {/* Link to Login */}
+<Typography variant="body2" align="center" sx={{ mt: 2 }}>
+  Already have an account?{' '}
+  <Link to="/login" style={{ color: '#14B8A6', textDecoration: 'none' }}>
+    Log in here
+  </Link>
+</Typography>
+<Typography variant="body2" align="center" sx={{ mt: 1 }}>
+  <Link to="/" style={{ color: "#14B8A6", textDecoration: "none" }}>
+    ← Back to Welcome
+  </Link>
+</Typography>
+      </Box>
+    </Container>
+  );
 };
 
-export default SignUpPage
+export default SignUpPage;
+
