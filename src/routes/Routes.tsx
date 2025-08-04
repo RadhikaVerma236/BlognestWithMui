@@ -5,6 +5,7 @@ import MainLayout from '../layout/MainLayout';
 import WelcomePage from '../pages/WelcomePage';
 import ProfilePage from '../pages/ProfilePage';
 import BlogDetailPage from '../pages/BlogDetailPage';
+import EditBlogForm from '../components/EditBlogForm';
 
 // Lazy-load all pages and layout
 // const WelcomePage = lazy(() => import('../pages/WelcomePage'));
@@ -29,7 +30,9 @@ const AppRoutes = () => (
   
     <Routes>
       {/* Public Routes */}
+      
       <Route path="/" element={<WelcomePage />} />
+      
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUpPage />} />
 
@@ -45,6 +48,7 @@ const AppRoutes = () => (
         <Route index element={<HomePage />} />
         <Route path="write" element={<WriteBlog/>} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="edit/:id" element={<EditBlogForm />} />
       </Route>
 
       {/* Catch-all */}

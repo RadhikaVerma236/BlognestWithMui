@@ -80,11 +80,11 @@ const BlogDetailPage =()=>{
     alt={blog.title}
     sx={{
       width: "100%",
-      maxHeight: 400,        // ⬅️ Limit image height
-      objectFit: "cover",    // ⬅️ Prevent distortion
+      maxHeight: 400,        // image height
+      objectFit: "cover",    // Prevent distortion
       borderRadius: 2,
-      display: "block",      // ⬅️ Ensures block-level layout
-      mx: "auto",            // ⬅️ Center the image horizontally
+      display: "block",      // Ensures block-level layout
+      mx: "auto",            // Center the image horizontally
     }}
   />
         </Box>

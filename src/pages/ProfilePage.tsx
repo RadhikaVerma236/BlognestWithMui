@@ -127,7 +127,7 @@ const ProfilePage = () => {
                     >
                         <BlogCard blog={blog} viewType="grid" 
                         showActions
-  onEdit={() => navigate(`/edit/${blog.id}`)}
+  onEdit={() => navigate(`/home/edit/${blog.id}`, {state:{blog}})}
   onDelete={() => handleDelete(blog.id)} />
                         
                     </Box>

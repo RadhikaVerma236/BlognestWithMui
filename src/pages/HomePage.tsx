@@ -1,8 +1,9 @@
-import { Autocomplete, Box, Button, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, TextField, Typography, useTheme } from '@mui/material';
 // import Navbar from '../layout/Navbar';
 import {useEffect, useState} from "react";
 import BlogCard from '../components/BlogCard';
 import type { Blog } from '../components/BlogCard';
+import HeroSection from '../components/HeroSection';
 
 const categories = [
   "Wellness & Self-Care",
@@ -21,6 +22,7 @@ const HomePage = () => {
   const [visibleCount, setVisibleCount]=useState(6);
   const [viewType, setViewType] = useState<"grid" | "list">("grid");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const theme = useTheme();
 
   useEffect(()=>{
     const storedBlogs = JSON.parse(localStorage.getItem("blogs") || "[]");
@@ -37,7 +39,11 @@ setBlogs(sorted);
     : blogs;
 
   return (
-    <Box sx={{ px: 4, py: 6 }}>
+    <>
+    <Box sx={{ overflowX: "hidden" }}>
+    <HeroSection />
+    </Box>
+    <Box id="blog-section" sx={{ px: 4, py: 6 }}>
       {/* Heading + Toggle Button */}
       <Box
         mb={4}
@@ -47,7 +53,14 @@ setBlogs(sorted);
         flexWrap="wrap"
         
       >
-        <Typography variant="h4">All Posts</Typography>
+        <Typography variant="h3" 
+        sx={{
+      fontWeight: 700,
+      fontSize: { xs: "1.8rem", sm: "2.2rem", md: "2.8rem" },
+      background: "linear-gradient(to right, #14B8A6, #2DD4BF)",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+    }}>Discover Stories</Typography>
 
       <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
         {/* Category Selector */}
@@ -55,10 +68,25 @@ setBlogs(sorted);
             value={selectedCategory}
             onChange={(_, newValue) => setSelectedCategory(newValue)}
             options={categories}
-            sx={{ minWidth: 250 }}
+            sx={{ minWidth: 250,
+              "& .MuiOutlinedInput-root": {
+      borderRadius: "12px",
+      backgroundColor: theme.palette.mode === "dark" ? "#1E293B" : "#fff", // dark vs light
+      color: theme.palette.text.primary,
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#14B8A6",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#14B8A6",
+      },
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#14B8A6",
+    },
+             }}
             clearOnEscape
             renderInput={(params) => (
-              <TextField {...params} label="Filter by Category" />
+              <TextField {...params} label="Filter by Category" variant="outlined" size="small" />
             )}
           />
           
@@ -68,6 +96,19 @@ setBlogs(sorted);
             onClick={() =>
               setViewType((prev) => (prev === "grid" ? "list" : "grid"))
             }
+            sx={{
+      borderRadius: "12px",
+      textTransform: "uppercase",
+      fontWeight: 500,
+      px: 2,
+      py: 1,
+      color: "#14B8A6",
+      borderColor: "#14B8A6",
+      "&:hover": {
+        backgroundColor: "#ECFDF5",
+        borderColor: "#14B8A6",
+      },
+    }}
           >
             {viewType === "grid" ? "Switch to List View" : "Switch to Grid View"}
           </Button>
@@ -81,7 +122,7 @@ setBlogs(sorted);
           flexDirection: viewType === "list" ? "column" : "row",
           flexWrap: viewType === "grid" ? "wrap" : "nowrap",
           gap: 3,
-          justifyContent: "flex-start",
+          justifyContent: viewType === "grid" ? "space-between" : "flex-start",
         }}
       >
         {filteredBlogs.slice(0, visibleCount).map((blog) => (
@@ -124,6 +165,7 @@ setBlogs(sorted);
         </Box>
       )}
     </Box>
+    </>
   );
 };
 

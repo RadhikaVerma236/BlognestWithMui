@@ -1,4 +1,3 @@
-// components/WriteBlogForm.tsx
 import {
   Box,
   Button,
@@ -7,11 +6,15 @@ import {
   TextField,
   Typography,
   MenuItem,
-  Snackbar,
   Alert,
+  Snackbar,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Dialog,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 
 const categories = [
@@ -26,26 +29,33 @@ const categories = [
   "Style & Fashion",
 ];
 
-const WriteBlogForm = () => {
+const EditBlogForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const blog = location.state?.blog;
 
-  // Get logged-in user from localStorage
+  // Get logged-in user
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
-  // If no user found, redirect to login
   useEffect(() => {
     if (!user?.email) {
       navigate("/login");
     }
-  }, [navigate, user]);
+    if (!blog) {
+      navigate("/home");
+    }
+  }, [navigate, user, blog]);
 
-  // Form state
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [author, setAuthor] = useState("");
-  const [category, setCategory] = useState("");
-  const [imageBase, setImageBase] = useState("");
+  // Pre-fill form with blog data
+  const [title, setTitle] = useState(blog?.title || "");
+  const [content, setContent] = useState(blog?.content || "");
+  const [author, setAuthor] = useState(blog?.author || "");
+  const [category, setCategory] = useState(blog?.category || "");
+  const [imageBase, setImageBase] = useState(blog?.imageBase || "");
   const [imageName, setImageName] = useState("");
+
+   // Dialog & Snackbar States
+  const [openDialog, setOpenDialog] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,7 +70,6 @@ const WriteBlogForm = () => {
     }
   };
 
-  //Remove Image
   const handleImageRemove = () => {
     setImageBase("");
     setImageName("");
@@ -71,36 +80,43 @@ const WriteBlogForm = () => {
 
     if (!title || !content || !author || !category) return;
 
-    
-    const newBlog = {
-      id: crypto.randomUUID(), // ✅ unique ID
+     // Show confirmation dialog
+  setOpenDialog(true);
+};
+
+
+     const handleDialogConfirm = () => {
+    // Proceed to update blog
+    const updatedBlog = {
+      ...blog,
       title,
       content,
       author,
       category,
       imageBase,
-      createdAt: new Date().toISOString(),
-      userEmail: user.email, // associate with logged-in user
+      updatedAt: new Date().toISOString(),
     };
 
     const stored = localStorage.getItem("blogs");
     const blogs = stored ? JSON.parse(stored) : [];
 
-    blogs.unshift(newBlog);
-    localStorage.setItem("blogs", JSON.stringify(blogs));
+    const updatedBlogs = blogs.map((b: any) =>
+      b.id === blog.id ? updatedBlog : b
+    );
 
-    // Show success Snackbar
-  setOpenSnackbar(true);
+    localStorage.setItem("blogs", JSON.stringify(updatedBlogs));
+    setOpenDialog(false);
+    setOpenSnackbar(true);
 
-  // Delay navigation so user sees the message
-  setTimeout(() => {
+    // Delay navigation for the Snackbar to show
+    setTimeout(() => {
     navigate("/home");
-  },500);
+    }, 500);
   };
 
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Box mb={2} display="flex" justifyContent="flex-end">
+        <Box mb={2} display="flex" justifyContent="flex-end">
   <Link
     to="/home"
     style={{
@@ -114,9 +130,13 @@ const WriteBlogForm = () => {
   </Link>
 </Box>
       <Typography variant="h4" gutterBottom>
-        Write a New Blog
+        Edit Blog
       </Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+      >
         <TextField
           label="Title"
           value={title}
@@ -150,28 +170,34 @@ const WriteBlogForm = () => {
           minRows={5}
           required
         />
-        {/* Show Image Preview if uploaded */}
+        {/* Image Preview */}
         {imageBase && (
-            <Box sx={{
-                position: "relative",
-                mt:1,
-                border:"1px solid #ccc",
-                pt: 1,
-                borderRadius: 2,
-                display: "flex",
-                flexDirection:"column",
-                gap:1,
-                alignItems:"flex-start",
-            }}>
-             <Typography variant="body2" color="text.secondary">
-              Selected file: {imageName}
-            </Typography> 
+          <Box
+            sx={{
+              position: "relative",
+              mt: 1,
+              border: "1px solid #ccc",
+              pt: 1,
+              borderRadius: 2,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              alignItems: "flex-start",
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Selected file: {imageName || "Existing Image"}
+            </Typography>
             <img
               src={imageBase}
               alt="Preview"
-              style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: 4 }}
+              style={{
+                width: "100px",
+                height: "100px",
+                objectFit: "cover",
+                borderRadius: 4,
+              }}
             />
-
             <IconButton
               size="small"
               onClick={handleImageRemove}
@@ -186,44 +212,45 @@ const WriteBlogForm = () => {
             >
               <CloseIcon fontSize="small" />
             </IconButton>
-          </Box>  
+          </Box>
         )}
+
         <Button variant="contained" component="label">
           Upload Image
           <input type="file" hidden onChange={handleImageUpload} />
         </Button>
-        
-        {/* {imageBase && (
-          <Box mt={2}>
-            <Typography variant="body2" gutterBottom>
-              Preview:
-            </Typography>
-            <img
-              src={imageBase}
-              alt="Uploaded Preview"
-              style={{ width: "100%", maxHeight: "300px", objectFit: "cover" }}
-            />
-          </Box>
-        )} */}
 
         <Button variant="contained" type="submit">
-          Post Blog
+          Update Blog
         </Button>
       </Box>
+      {/* Confirmation Dialog */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Confirm Update</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to update this blog?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleDialogConfirm}>
+            Yes, Update
+          </Button>
+        </DialogActions>
+      </Dialog>
 
+      {/* Success Snackbar */}
       <Snackbar
-  open={openSnackbar}
-  autoHideDuration={2000}
-  onClose={() => setOpenSnackbar(false)}
-  anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
->
-  <Alert severity="success" sx={{ width: "100%" }}>
-    Blog posted successfully!
-  </Alert>
-</Snackbar>
+        open={openSnackbar}
+        autoHideDuration={2000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="success" sx={{ width: "100%" }}>
+          Blog updated successfully!
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
 
-export default WriteBlogForm;
-
+export default EditBlogForm;
